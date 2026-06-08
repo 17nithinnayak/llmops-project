@@ -1,0 +1,33 @@
+name: Build & Test — Cloud Code Review API
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: pip install -r app/requirements.txt pytest pytest-asyncio
+
+      - name: Lint check
+        run: python -m py_compile app/main.py app/metrics.py app/config.py && echo "All files OK"
+
+  build:
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build Docker image
+        run: docker build -t llm-code-review-api ./app
+
+      - name: Smoke test image
+        run: echo "Image built successfully"
