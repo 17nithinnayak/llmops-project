@@ -1,0 +1,58 @@
+{
+  "title": "LLMOps — Cloud Code Review",
+  "uid": "llmops-dashboard",
+  "timezone": "browser",
+  "schemaVersion": 38,
+  "refresh": "10s",
+  "panels": [
+    {
+      "id": 1, "type": "stat", "title": "Total Reviews",
+      "gridPos": {"x":0,"y":0,"w":6,"h":4},
+      "targets": [{"expr": "sum(llm_requests_total{status='success'})", "legendFormat": "Reviews"}],
+      "options": {"colorMode": "value", "graphMode": "area"}
+    },
+    {
+      "id": 2, "type": "stat", "title": "Active Requests",
+      "gridPos": {"x":6,"y":0,"w":6,"h":4},
+      "targets": [{"expr": "llm_active_requests", "legendFormat": "Active"}],
+      "options": {"colorMode": "background"}
+    },
+    {
+      "id": 3, "type": "stat", "title": "P95 Latency (s)",
+      "gridPos": {"x":12,"y":0,"w":6,"h":4},
+      "targets": [{"expr": "histogram_quantile(0.95, rate(llm_request_latency_seconds_bucket[5m]))", "legendFormat": "p95"}],
+      "options": {"colorMode": "value"}
+    },
+    {
+      "id": 4, "type": "stat", "title": "Error Rate",
+      "gridPos": {"x":18,"y":0,"w":6,"h":4},
+      "targets": [{"expr": "sum(llm_requests_total{status!='success'}) / sum(llm_requests_total)", "legendFormat": "Errors"}],
+      "options": {"colorMode": "background"}
+    },
+    {
+      "id": 5, "type": "timeseries", "title": "Request Latency (p50 / p95 / p99)",
+      "gridPos": {"x":0,"y":4,"w":12,"h":8},
+      "targets": [
+        {"expr": "histogram_quantile(0.50, rate(llm_request_latency_seconds_bucket[2m]))", "legendFormat": "p50"},
+        {"expr": "histogram_quantile(0.95, rate(llm_request_latency_seconds_bucket[2m]))", "legendFormat": "p95"},
+        {"expr": "histogram_quantile(0.99, rate(llm_request_latency_seconds_bucket[2m]))", "legendFormat": "p99"}
+      ]
+    },
+    {
+      "id": 6, "type": "timeseries", "title": "Requests per minute",
+      "gridPos": {"x":12,"y":4,"w":12,"h":8},
+      "targets": [
+        {"expr": "rate(llm_requests_total{status='success'}[1m]) * 60", "legendFormat": "Success"},
+        {"expr": "rate(llm_requests_total{status!='success'}[1m]) * 60", "legendFormat": "Errors"}
+      ]
+    },
+    {
+      "id": 7, "type": "timeseries", "title": "Tokens Generated per Request",
+      "gridPos": {"x":0,"y":12,"w":12,"h":8},
+      "targets": [
+        {"expr": "histogram_quantile(0.50, rate(llm_tokens_generated_bucket[5m]))", "legendFormat": "p50 tokens"},
+        {"expr": "histogram_quantile(0.95, rate(llm_tokens_generated_bucket[5m]))", "legendFormat": "p95 tokens"}
+      ]
+    }
+  ]
+}
